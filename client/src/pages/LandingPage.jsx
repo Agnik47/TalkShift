@@ -110,10 +110,10 @@ Feature.propTypes = {
 
 const ChatPreview = () => {
   const messages = [
-    { sender: "Alex", message: "Just finished the new feature! 🎉", time: "10:30 AM", isUser: false },
+    { sender: "Anandu", message: "Just finished the new Design! 🎉", time: "10:30 AM", isUser: false },
     { sender: "You", message: "Amazing work! Can't wait to test it out", time: "10:31 AM", isUser: true },
-    { sender: "Sarah", message: "The design looks stunning! 🔥", time: "10:32 AM", isUser: false },
-    { sender: "Mike", message: "Team sync in 15 minutes?", time: "10:33 AM", isUser: false },
+    { sender: "Dev Agarwalla", message: "The design looks stunning! 🔥", time: "10:32 AM", isUser: false },
+    { sender: "Somoudeep", message: "Team sync in 15 minutes?", time: "10:33 AM", isUser: false },
     { sender: "You", message: "Perfect timing, I'll be there", time: "10:34 AM", isUser: true },
   ];
 
