@@ -221,7 +221,7 @@ const ChatPreview = () => {
                 <Box w="2" h="2" bg="blue.500" borderRadius="full" />
               </MotionBox>
               <Text fontSize="sm" color="gray.500" ml={2}>
-                Alex is typing...
+                Anandu is typing...
               </Text>
             </HStack>
           </Box>
