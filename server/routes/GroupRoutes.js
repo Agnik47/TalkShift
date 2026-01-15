@@ -1,6 +1,6 @@
 const express = require("express");
-const Group = require("../models/GroupModel");
-const {protect, isAdmin} = require("../middleware/authMiddleware");
+const Group = require("../models/GroupModel.js");
+const {protect, isAdmin} = require("../middleware/authMiddleware.js");
 const GroupRouter = express.Router();
 
 //Cerate new
