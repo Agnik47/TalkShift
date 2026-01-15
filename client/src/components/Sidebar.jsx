@@ -37,14 +37,14 @@ import { RiGroupFill } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const MotionBox = motion(Box);
 
 const Sidebar = ({ setSelectedGroup, selectedGroup }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-  const URL = "http://localhost:5000";
+  const URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const [groups, setGroups] = useState([]);
   const [userGroups, setUserGroups] = useState([]);

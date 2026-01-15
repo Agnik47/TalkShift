@@ -1,4 +1,14 @@
-import { Box, Flex, useDisclosure, Drawer, DrawerOverlay, DrawerContent, DrawerBody, IconButton, useMediaQuery } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  useDisclosure,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerBody,
+  IconButton,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import Sidebar from "../components/Sidebar";
 import ChatArea from "../components/ChatArea";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -6,7 +16,7 @@ import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
 
-const ENDPOINT = "http://localhost:5000";
+const ENDPOINT = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
 const MotionBox = motion(Box);
 
@@ -43,8 +53,8 @@ const Chat = () => {
   };
 
   return (
-    <Flex 
-      h="100vh" 
+    <Flex
+      h="100vh"
       bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
       position="relative"
       overflow="hidden"
@@ -91,8 +101,8 @@ const Chat = () => {
           position="relative"
           zIndex="10"
         >
-          <Sidebar 
-            setSelectedGroup={handleGroupSelect} 
+          <Sidebar
+            setSelectedGroup={handleGroupSelect}
             selectedGroup={selectedGroup}
             setGroups={setGroups}
           />
@@ -100,21 +110,16 @@ const Chat = () => {
       )}
 
       {/* Drawer for Mobile */}
-      <Drawer
-        isOpen={isOpen}
-        placement="left"
-        onClose={onClose}
-        size="full"
-      >
+      <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="full">
         <DrawerOverlay backdropFilter="blur(4px)" />
-        <DrawerContent 
+        <DrawerContent
           bg="rgba(255, 255, 255, 0.95)"
           backdropFilter="blur(10px)"
           maxW="380px"
         >
           <DrawerBody p="0">
-            <Sidebar 
-              setSelectedGroup={handleGroupSelect} 
+            <Sidebar
+              setSelectedGroup={handleGroupSelect}
               selectedGroup={selectedGroup}
               setGroups={setGroups}
             />
@@ -142,14 +147,14 @@ const Chat = () => {
           bg="white"
         >
           {socket && selectedGroup && (
-            <ChatArea 
-              socket={socket} 
+            <ChatArea
+              socket={socket}
               selectedGroup={selectedGroup}
               onMenuClick={onOpen}
               isMobile={isMobile}
             />
           )}
-          
+
           {/* No Group Selected State */}
           {!selectedGroup && (
             <Flex
@@ -171,11 +176,7 @@ const Chat = () => {
                 alignItems="center"
                 justifyContent="center"
               >
-                <Box
-                  as="span"
-                  fontSize="4xl"
-                  color="purple.500"
-                >
+                <Box as="span" fontSize="4xl" color="purple.500">
                   👋
                 </Box>
               </Box>
@@ -183,7 +184,9 @@ const Chat = () => {
                 Welcome to ChatSphere
               </Box>
               <Box color="gray.500" maxW="md" mb="6">
-                {isMobile ? "Tap on a group to start chatting!" : "Select a group from the sidebar to start chatting"}
+                {isMobile
+                  ? "Tap on a group to start chatting!"
+                  : "Select a group from the sidebar to start chatting"}
               </Box>
               <Box
                 display="inline-flex"

@@ -18,7 +18,14 @@ import {
 } from "@chakra-ui/react";
 
 import { Link, useNavigate } from "react-router-dom";
-import { FiLogIn, FiEye, FiEyeOff, FiLock, FiMail, FiMessageSquare } from "react-icons/fi";
+import {
+  FiLogIn,
+  FiEye,
+  FiEyeOff,
+  FiLock,
+  FiMail,
+  FiMessageSquare,
+} from "react-icons/fi";
 import { RiRobot2Line } from "react-icons/ri";
 import { useState } from "react";
 import axios from "axios";
@@ -34,13 +41,16 @@ const Login = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const [isMobile] = useMediaQuery("(max-width: 768px)");
-  const URL = "http://localhost:5000";
+  const URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post(`${URL}/api/users/login`, { email, password });
+      const { data } = await axios.post(`${URL}/api/users/login`, {
+        email,
+        password,
+      });
       localStorage.setItem("userInfo", JSON.stringify(data));
       toast({
         title: "Login Successful",
@@ -156,8 +166,13 @@ const Login = () => {
             bg="whiteAlpha.100"
             borderRadius="full"
           />
-          
-          <Flex direction="column" align="center" position="relative" zIndex="1">
+
+          <Flex
+            direction="column"
+            align="center"
+            position="relative"
+            zIndex="1"
+          >
             <MotionBox
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -226,7 +241,9 @@ const Login = () => {
                   />
                   <InputRightElement>
                     <IconButton
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       icon={showPassword ? <FiEyeOff /> : <FiEye />}
                       variant="ghost"
                       size="sm"
@@ -272,21 +289,25 @@ const Login = () => {
               <Icon as={FiMessageSquare} />
               <Text>Do not have an account?</Text>
               <Link className="cursor-pointer text-blue-500" to="/register">
-                  Create Account
+                Create Account
               </Link>
             </Flex>
 
-            <Text fontSize="xs" color="gray.500" textAlign="center" maxW="sm" mx="auto">
-              By signing in, you agree to our Terms of Service and Privacy Policy
+            <Text
+              fontSize="xs"
+              color="gray.500"
+              textAlign="center"
+              maxW="sm"
+              mx="auto"
+            >
+              By signing in, you agree to our Terms of Service and Privacy
+              Policy
             </Text>
           </VStack>
         </Box>
 
         {/* Bottom Decoration */}
-        <Box
-          h="4px"
-          bgGradient="linear(to-r, blue.500, purple.500)"
-        />
+        <Box h="4px" bgGradient="linear(to-r, blue.500, purple.500)" />
       </MotionBox>
 
       {/* Brand Tagline */}

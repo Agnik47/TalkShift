@@ -18,7 +18,15 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiMessageSquare, FiCheck } from "react-icons/fi";
+import {
+  FiUser,
+  FiMail,
+  FiLock,
+  FiEye,
+  FiEyeOff,
+  FiMessageSquare,
+  FiCheck,
+} from "react-icons/fi";
 import { RiRobot2Line } from "react-icons/ri";
 import { useState } from "react";
 import axios from "axios";
@@ -37,11 +45,11 @@ const Register = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const [isMobile] = useMediaQuery("(max-width: 768px)");
-  const URL = "http://localhost:5000";
+  const URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate passwords match
     if (password !== confirmPassword) {
       toast({
@@ -70,7 +78,11 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${URL}/api/users/register`, { username, email, password });
+      const response = await axios.post(`${URL}/api/users/register`, {
+        username,
+        email,
+        password,
+      });
       toast({
         title: "Registration Successful",
         description: "Your account has been created successfully",
@@ -204,8 +216,13 @@ const Register = () => {
             bg="whiteAlpha.100"
             borderRadius="full"
           />
-          
-          <Flex direction="column" align="center" position="relative" zIndex="1">
+
+          <Flex
+            direction="column"
+            align="center"
+            position="relative"
+            zIndex="1"
+          >
             <MotionBox
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -258,7 +275,7 @@ const Register = () => {
                   <InputLeftElement pointerEvents="none">
                     <Icon as={FiMail} color="gray.400" />
                   </InputLeftElement>
-                  <Input  
+                  <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -299,7 +316,9 @@ const Register = () => {
                   />
                   <InputRightElement>
                     <IconButton
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                       icon={showPassword ? <FiEyeOff /> : <FiEye />}
                       variant="ghost"
                       size="sm"
@@ -308,18 +327,28 @@ const Register = () => {
                     />
                   </InputRightElement>
                 </InputGroup>
-                
+
                 {password.length > 0 && (
                   <Box mt={2}>
                     <Flex align="center" justify="space-between" mb={1}>
                       <Text fontSize="xs" color="gray.600">
                         Password strength
                       </Text>
-                      <Text fontSize="xs" fontWeight="medium" color={getStrengthColor(passwordStrength())}>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="medium"
+                        color={getStrengthColor(passwordStrength())}
+                      >
                         {passwordStrength()}%
                       </Text>
                     </Flex>
-                    <Box w="100%" h="2px" bg="gray.200" borderRadius="full" overflow="hidden">
+                    <Box
+                      w="100%"
+                      h="2px"
+                      bg="gray.200"
+                      borderRadius="full"
+                      overflow="hidden"
+                    >
                       <Box
                         h="100%"
                         w={`${passwordStrength()}%`}
@@ -329,8 +358,18 @@ const Register = () => {
                     </Box>
                     <HStack spacing={4} mt={2}>
                       <Flex align="center" gap={1}>
-                        <Icon as={FiCheck} color={password.length >= 6 ? "green.500" : "gray.300"} />
-                        <Text fontSize="xs" color={password.length >= 6 ? "green.600" : "gray.400"}>
+                        <Icon
+                          as={FiCheck}
+                          color={
+                            password.length >= 6 ? "green.500" : "gray.300"
+                          }
+                        />
+                        <Text
+                          fontSize="xs"
+                          color={
+                            password.length >= 6 ? "green.600" : "gray.400"
+                          }
+                        >
                           6+ characters
                         </Text>
                       </Flex>
@@ -353,23 +392,35 @@ const Register = () => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm your password"
                     bg="gray.50"
-                    borderColor={confirmPassword && password !== confirmPassword ? "red.300" : "gray.200"}
+                    borderColor={
+                      confirmPassword && password !== confirmPassword
+                        ? "red.300"
+                        : "gray.200"
+                    }
                     _hover={{ borderColor: "purple.300" }}
                     _focus={{
-                      borderColor: confirmPassword && password !== confirmPassword ? "red.500" : "purple.500",
-                      boxShadow: confirmPassword && password !== confirmPassword ? 
-                        "0 0 0 1px var(--chakra-colors-red-500)" : 
-                        "0 0 0 1px var(--chakra-colors-purple-500)",
+                      borderColor:
+                        confirmPassword && password !== confirmPassword
+                          ? "red.500"
+                          : "purple.500",
+                      boxShadow:
+                        confirmPassword && password !== confirmPassword
+                          ? "0 0 0 1px var(--chakra-colors-red-500)"
+                          : "0 0 0 1px var(--chakra-colors-purple-500)",
                     }}
                     borderRadius="xl"
                   />
                   <InputRightElement>
                     <IconButton
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showConfirmPassword ? "Hide password" : "Show password"
+                      }
                       icon={showConfirmPassword ? <FiEyeOff /> : <FiEye />}
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       _hover={{ bg: "transparent" }}
                     />
                   </InputRightElement>
@@ -427,17 +478,21 @@ const Register = () => {
               </Link>
             </Flex>
 
-            <Text fontSize="xs" color="gray.500" textAlign="center" maxW="sm" mx="auto">
-              By creating an account, you agree to our Terms of Service and Privacy Policy
+            <Text
+              fontSize="xs"
+              color="gray.500"
+              textAlign="center"
+              maxW="sm"
+              mx="auto"
+            >
+              By creating an account, you agree to our Terms of Service and
+              Privacy Policy
             </Text>
           </VStack>
         </Box>
 
         {/* Bottom Decoration */}
-        <Box
-          h="4px"
-          bgGradient="linear(to-r, purple.500, pink.500)"
-        />
+        <Box h="4px" bgGradient="linear(to-r, purple.500, pink.500)" />
       </MotionBox>
 
       {/* Brand Tagline */}
