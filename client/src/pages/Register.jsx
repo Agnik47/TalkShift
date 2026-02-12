@@ -83,6 +83,7 @@ const Register = () => {
         email,
         password,
       });
+      console.log(response);
       toast({
         title: "Registration Successful",
         description: "Your account has been created successfully",
@@ -427,7 +428,7 @@ const Register = () => {
                 </InputGroup>
                 {confirmPassword && password !== confirmPassword && (
                   <Text fontSize="sm" color="red.500" mt={2}>
-                    Passwords don't match
+                    Passwords do not match
                   </Text>
                 )}
               </FormControl>

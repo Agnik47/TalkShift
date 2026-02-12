@@ -8,8 +8,8 @@ const socketIo = (io) => {
 
   // When a user connects
   io.on("connection", (socket) => {
-    // Get user from authentication (sent from frontend)
-    const user = socket.handshake.auth.user;
+    //! Get user from authentication (sent from frontend)
+    const user = socket.handshake.auth.user; //? Ye Hand Shake Kyu use karta hai? socket.handshake.auth.user kyu use kiya
 
     if (!user) {
       console.log("Unauthenticated socket blocked ❌");
@@ -25,10 +25,10 @@ const socketIo = (io) => {
       socket.join(groupId);
 
       // Store user and room info in connectedUsers map
-      connectedUsers.set(socket.id, { user, room: groupId });
+      connectedUsers.set(socket.id, { user, room: groupId }); //? Mujhe MAP DS nahi ata so samjha nahi ye Line
 
       // Get all users currently in this room
-      const usersInRoom = Array.from(connectedUsers.values())
+      const usersInRoom = Array.from(connectedUsers.values()) 
         .filter((u) => u.room === groupId)
         .map((u) => u.user);
 

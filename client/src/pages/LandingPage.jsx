@@ -16,7 +16,6 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import {
-  FiMessageSquare,
   FiLogIn,
   FiUserPlus,
   FiActivity,
@@ -316,7 +315,7 @@ export default function LandingPage() {
                 <Flex align="center" gap={3} mb={6}>
                   <Icon as={RiRobot2Line} boxSize={10} color="purple.500" />
                   <Text fontSize="sm" fontWeight="bold" color="purple.500" letterSpacing="wider">
-                    TALKSHIT
+                    TALKSHIFT
                   </Text>
                 </Flex>
 
