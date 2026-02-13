@@ -8,6 +8,7 @@ const socketIo = require("./socket");
 const UserRouter = require("./routes/UserRoutes.js");
 const GroupRouter = require("./routes/GroupRoutes.js");
 const ChatRouter = require("./routes/messageRoute.js");
+const aiRoutes = require("./routes/aiRoutes.js");
 dotenv.config();
 
 const app = express();
@@ -38,6 +39,7 @@ socketIo(io);
 app.use("/api/users", UserRouter);
 app.use("/api/groups", GroupRouter);
 app.use("/api/messages", ChatRouter);
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.get("/", (req, res) => {

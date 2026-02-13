@@ -69,24 +69,36 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
   useEffect(() => {
     if (!selectedGroup || !socket) return;
 
+    console.log("Setting up socket listeners for group:", selectedGroup._id);
+
     fetchMessages();
     fetchGroupMembers();
 
     // Join room
     socket.emit("join room", selectedGroup._id);
 
+    // Cleanup old listeners first to prevent duplicates
+    socket.off("message recived");
+    socket.off("usersInRoom");
+    socket.off("notification");
+    socket.off("user typing");
+    socket.off("user stop typing");
+
     // Listen for messages
     socket.on("message recived", (message) => {
+      console.log("Message received on socket:", message);
       setMessages((prev) => [...prev, message]);
     });
 
     // Listen for user list updates (only online/connected users)
     socket.on("usersInRoom", (users) => {
+      console.log("Users in room:", users);
       setConnectedUsers(users);
     });
 
     // Listen for notifications
     socket.on("notification", (notification) => {
+      console.log("Notification received:", notification);
       toast({
         title:
           notification.type === "USER_JOINED" ? "User Joined" : "User Left",
@@ -99,6 +111,7 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
 
     // Typing indicator
     socket.on("user typing", ({ username }) => {
+      console.log("User typing:", username);
       setTypingUsers((prev) => {
         if (!prev.includes(username)) {
           return [...prev, username];
@@ -109,10 +122,12 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
 
     // Stop typing
     socket.on("user stop typing", ({ username }) => {
+      console.log("User stopped typing:", username);
       setTypingUsers((prev) => prev.filter((u) => u !== username));
     });
 
     return () => {
+      console.log("Cleaning up socket listeners for group:", selectedGroup._id);
       socket.emit("leave room", selectedGroup._id);
       socket.off("message recived");
       socket.off("usersInRoom");
@@ -133,7 +148,7 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
         `${URL}/api/messages/${selectedGroup._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       setMessages(data.reverse());
     } catch (err) {
@@ -164,8 +179,86 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
     }
   };
 
+  // ✅ AI SUMMARY FUNCTION
+  const generateSummary = async () => {
+    try {
+      console.log("Generating AI Summary for group:", selectedGroup._id);
+
+      const { data } = await axios.post(
+        `${URL}/api/ai/summary/${selectedGroup._id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      console.log("Summary Response:", data);
+
+      const aiMessage = {
+        _id: `ai-${Date.now()}`,
+        sender: {
+          _id: "ai-bot",
+          username: "AI Assistant",
+          avatar: null,
+        },
+        content: data.summary,
+        createdAt: new Date().toISOString(),
+        isSystem: true,
+      };
+
+      console.log("AI Message Object:", aiMessage);
+
+      // Add locally first
+      setMessages((prev) => {
+        console.log("Adding AI message to local state");
+        return [...prev, aiMessage];
+      });
+
+      // Emit to other users
+      if (socket && socket.connected) {
+        console.log("Emitting AI message through socket");
+        socket.emit("message recived", {
+          groupId: selectedGroup._id,
+          message: aiMessage,
+        });
+      } else {
+        console.warn("Socket not connected");
+      }
+
+      toast({
+        title: "AI Summary Generated",
+        status: "success",
+        duration: 2000,
+        position: "top-right",
+      });
+    } catch (err) {
+      console.error("AI Summary Error:", err);
+      toast({
+        title: "AI Summary Failed",
+        description: err.response?.data?.message || err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !socket || !selectedGroup) return;
+
+    const trimmedMessage = newMessage.trim();
+
+    // ✅ Command detection - More robust check
+    if (
+      trimmedMessage === "\\summary" ||
+      trimmedMessage === "\\summary" ||
+      trimmedMessage.toLowerCase() === "/summary"
+    ) {
+      console.log("Summary command detected");
+      setNewMessage("");
+      await generateSummary();
+      return;
+    }
 
     try {
       const { data } = await axios.post(
@@ -176,7 +269,7 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       // Emit to other users in the room
@@ -271,6 +364,16 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
           </Flex>
 
           <HStack spacing="2">
+            <Tooltip label="AI Summary">
+              <IconButton
+                aria-label="Generate AI summary"
+                icon={<RiRobot2Line />}
+                variant="ghost"
+                colorScheme="purple"
+                size="sm"
+                onClick={generateSummary}
+              />
+            </Tooltip>
             <Tooltip label="Voice Call">
               <IconButton
                 aria-label="Voice call"
@@ -340,23 +443,35 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
           <AnimatePresence>
             <VStack spacing="4" align="stretch">
               {messages.map((message, index) => {
-                const isCurrentUser = message.sender?._id === userInfo._id;
+                const isAI = message.sender?.username === "AI Assistant" || message.isSystem === true;
+                const isCurrentUser = message.sender?._id === userInfo._id && !isAI;
                 const showAvatar =
                   index === 0 ||
                   messages[index - 1]?.sender?._id !== message.sender?._id;
 
+                if (!message || !message.content) {
+                  console.warn("Invalid message object:", message);
+                  return null;
+                }
+
                 return (
                   <MotionBox
-                    key={message._id || index}
+                    key={message._id || `msg-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <Flex
-                      justify={isCurrentUser ? "flex-end" : "flex-start"}
+                      justify={
+                        isAI
+                          ? "center"
+                          : isCurrentUser
+                            ? "flex-end"
+                            : "flex-start"
+                      }
                       gap="3"
                     >
-                      {!isCurrentUser && showAvatar && (
+                      {!isCurrentUser && showAvatar && !isAI && (
                         <Avatar
                           size="sm"
                           name={message.sender?.username}
@@ -365,35 +480,60 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
                         />
                       )}
 
-                      {!isCurrentUser && !showAvatar && <Box w="32px" />}
+                      {!isCurrentUser && !showAvatar && !isAI && (
+                        <Box w="32px" />
+                      )}
 
                       <Box
                         maxW={{ base: "80%", md: "70%" }}
-                        bg={isCurrentUser ? "blue.500" : "white"}
-                        color={isCurrentUser ? "white" : "gray.800"}
+                        bg={
+                          isAI
+                            ? "linear(135deg, purple.50 0%, indigo.50 100%)"
+                            : isCurrentUser
+                              ? "blue.500"
+                              : "white"
+                        }
+                        bgGradient={
+                          isAI
+                            ? "linear(135deg, purple.50 0%, indigo.50 100%)"
+                            : "transparent"
+                        }
+                        color={
+                          isAI
+                            ? "purple.900"
+                            : isCurrentUser
+                              ? "white"
+                              : "gray.800"
+                        }
                         px="4"
                         py="3"
                         borderRadius="2xl"
-                        borderBottomLeftRadius={isCurrentUser ? "2xl" : "0"}
-                        borderBottomRightRadius={isCurrentUser ? "0" : "2xl"}
-                        boxShadow="sm"
+                        borderBottomLeftRadius={
+                          isAI ? "2xl" : isCurrentUser ? "2xl" : "0"
+                        }
+                        borderBottomRightRadius={
+                          isAI ? "2xl" : isCurrentUser ? "0" : "2xl"
+                        }
+                        boxShadow={isAI ? "md" : "sm"}
+                        border={isAI ? "2px solid" : "none"}
+                        borderColor={isAI ? "purple.200" : "transparent"}
                         position="relative"
-                        _before={{
-                          content: '""',
-                          position: "absolute",
-                          bottom: 0,
-                          left: isCurrentUser ? "auto" : "-8px",
-                          right: isCurrentUser ? "-8px" : "auto",
-                          width: "16px",
-                          height: "16px",
-                          bg: isCurrentUser ? "blue.500" : "white",
-                          clipPath: "polygon(100% 0, 0 0, 100% 100%)",
-                          transform: isCurrentUser
-                            ? "rotate(-90deg)"
-                            : "rotate(0deg)",
-                        }}
                       >
-                        {!isCurrentUser && showAvatar && (
+                        {isAI && (
+                          <Flex
+                            fontSize="xs"
+                            fontWeight="bold"
+                            mb="2"
+                            color="purple.700"
+                            alignItems="center"
+                            gap="1"
+                          >
+                            <Icon as={RiRobot2Line} />
+                            <Text>AI Assistant</Text>
+                          </Flex>
+                        )}
+
+                        {!isCurrentUser && showAvatar && !isAI && (
                           <Text
                             fontSize="xs"
                             fontWeight="medium"
@@ -403,7 +543,9 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
                             {message.sender?.username}
                           </Text>
                         )}
+
                         <Text fontSize="md">{message.content}</Text>
+
                         <Text
                           fontSize="xs"
                           opacity="0.7"
@@ -417,7 +559,7 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
                         </Text>
                       </Box>
 
-                      {isCurrentUser && showAvatar && (
+                      {isCurrentUser && showAvatar && !isAI && (
                         <Avatar
                           size="sm"
                           name={userInfo.username}
@@ -519,21 +661,18 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
                 onChange={(e) => {
                   setNewMessage(e.target.value);
 
-                  // Emit typing event
                   socket.emit("typing", selectedGroup._id, userInfo.username);
 
-                  // Clear previous timeout
                   if (typingTimeoutRef.current) {
                     clearTimeout(typingTimeoutRef.current);
                   }
 
-                  // Set new timeout for stop typing
                   typingTimeoutRef.current = setTimeout(() => {
                     socket.emit("stopTyping", selectedGroup._id);
                   }, 3000);
                 }}
                 onKeyPress={handleKeyPress}
-                placeholder="Type your message here..."
+                placeholder="Type your message... (type /summary or \summary for AI)"
                 borderRadius="full"
                 focusBorderColor="blue.500"
                 bg="gray.50"
