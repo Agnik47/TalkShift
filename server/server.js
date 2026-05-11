@@ -1,5 +1,6 @@
+require("dotenv").config();
+
 const express = require("express");
-const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const http = require("http");
 const cors = require("cors");
@@ -9,7 +10,6 @@ const UserRouter = require("./routes/UserRoutes.js");
 const GroupRouter = require("./routes/GroupRoutes.js");
 const ChatRouter = require("./routes/messageRoute.js");
 const aiRoutes = require("./routes/aiRoutes.js");
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
