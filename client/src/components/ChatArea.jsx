@@ -62,7 +62,7 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
+ 
   const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
   const token = userInfo?.token;
 
@@ -182,17 +182,17 @@ const ChatArea = ({ socket, selectedGroup, onMenuClick, isMobile }) => {
   // ✅ AI SUMMARY FUNCTION
   const generateSummary = async () => {
     try {
-      console.log("Generating AI Summary for group:", selectedGroup._id);
+     //* console.log("Generating AI Summary for group:", selectedGroup._id);
 
       const { data } = await axios.post(
         `${URL}/api/ai/summary/${selectedGroup._id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        },  
       );
 
-      console.log("Summary Response:", data);
+     //* console.log("Summary Response:", data);
 
       const aiMessage = {
         _id: `ai-${Date.now()}`,
